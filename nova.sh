@@ -3,10 +3,10 @@ REDIS=redis-2.0.0-rc4
 BRANCH=lp:nova
 USE_VENV=0
 TEST=0
-LIBVIRT_TYPE=qemu
+LIBVIRT_TYPE=uml
 
 DIR=`pwd`
-NOVA_DIR=$DIR/nova
+NOVA_DIR=$DIR/fixes
 REDIS_DIR=$DIR/$REDIS
 IMAGES_DIR=$DIR/images
 if [ "$USE_VENV" == 1 ]; then
@@ -24,7 +24,8 @@ if [ "$CMD" == "branch" ]; then
     rm -rf $NOVA_DIR
     bzr branch $BRANCH $NOVA_DIR
     cd $NOVA_DIR
-    mkdir $NOVA_DIR/instances
+    mkdir -p $NOVA_DIR/instances
+    mkdir -p $NOVA_DIR/networks
     ln -s $IMAGES_DIR $NOVA_DIR/images
     if [ "$USE_VENV" == 1 ]; then
         sudo apt-get build-dep -y python-m2crypto
@@ -70,6 +71,9 @@ if [ "$CMD" == "run" ]; then
     killall dnsmasq
     rm nova.sqlite
     rm dump.rdb
+    mkdir -p $NOVA_DIR/instances
+    mkdir -p $NOVA_DIR/networks
+    ln -s $IMAGES_DIR $NOVA_DIR/images
     # start redis
     screen -d -m -S nova -t nova
     sleep 1
@@ -95,7 +99,7 @@ if [ "$CMD" == "run" ]; then
     screen_it compute "$VENV$NOVA_DIR/bin/nova-compute --verbose --nodaemon --libvirt_type=$LIBVIRT_TYPE"
     screen_it network "$VENV$NOVA_DIR/bin/nova-network --verbose --nodaemon"
     screen_it scheduler "$VENV$NOVA_DIR/bin/nova-scheduler --verbose --nodaemon"
-    screen_it volume "$VENV$NOVA_DIR/bin/nova-volume --verbose --nodaemon"
+    screen_it volume "$VENV$NOVA_DIR/bin/nova-volume --verbose --nodaemon --volume_driver=nova.volume.driver.FakeAOEDriver"
     screen_it test ". $NOVA_DIR/novarc$NL"
     screen -x
 
