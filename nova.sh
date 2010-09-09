@@ -86,7 +86,7 @@ if [ "$CMD" == "run" ]; then
     fi
 
     # create an admin user called 'admin'
-    $VENV$NOVA_DIR/bin/nova-manage user admin admin
+    $VENV$NOVA_DIR/bin/nova-manage user admin admin admin admin
     # create a project called 'admin' with project manager of 'admin'
     $VENV$NOVA_DIR/bin/nova-manage project create admin admin
     # export environment variables for project 'admin' and user 'admin'
