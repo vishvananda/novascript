@@ -3,10 +3,10 @@ REDIS=redis-2.0.0-rc4
 BRANCH=lp:nova
 USE_VENV=0
 TEST=0
-LIBVIRT_TYPE=uml
+LIBVIRT_TYPE=qemu
 
 DIR=`pwd`
-NOVA_DIR=$DIR/fixes
+NOVA_DIR=$DIR/nova
 REDIS_DIR=$DIR/$REDIS
 IMAGES_DIR=$DIR/images
 if [ "$USE_VENV" == 1 ]; then
