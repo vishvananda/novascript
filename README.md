@@ -73,3 +73,5 @@ You will need a few bleeding edge packages to make it work.
     sudo add-apt-repository ppa:nova-core/ppa
     sudo apt-get update
     sudo apt-get install -y libvirt user-mode-linux
+
+If you have any issues, there is usually someone in #openstack on irc.freenode.net that can help you out.
