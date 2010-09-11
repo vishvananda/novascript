@@ -61,8 +61,9 @@ if [ "$CMD" == "install" ]; then
     cd $DIR
 fi
 
+NL=`echo -ne '\015'`
+
 function screen_it {
-    NL=`echo -ne '\015'`
     screen -S nova -X screen -t $1
     screen -S nova -p $1 -X stuff "$2$NL"
 }
@@ -71,8 +72,11 @@ if [ "$CMD" == "run" ]; then
     killall dnsmasq
     rm nova.sqlite
     rm dump.rdb
+    rm -rf $NOVA_DIR/instances
     mkdir -p $NOVA_DIR/instances
+    rm -rf $NOVA_DIR/networks
     mkdir -p $NOVA_DIR/networks
+    $NOVA_DIR/tools/clean-vlans
     ln -s $IMAGES_DIR $NOVA_DIR/images
     # start redis
     screen -d -m -S nova -t nova
@@ -103,7 +107,9 @@ if [ "$CMD" == "run" ]; then
     screen_it test ". $NOVA_DIR/novarc$NL"
     screen -x
 
-    # shutdown screen
+    # shutdown instances
+    screen -S nova -p test "euca-describe-instances | grep i- | cut -f2 | xargs euca-terminate-instances$NL"
+    sleep 2
     # redis simply disconnects on screen kill so force it to die
     killall redis-server
     # nova-api doesn't like being killed, so try to ctrl-c it
