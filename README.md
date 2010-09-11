@@ -1,10 +1,10 @@
 Nova Installation Script
-++++++++++++++++++++++++
+========================
 
 This script will install and run nova on ubuntu.
 
 Usage
-=====
+-----
 
 Unless you want to spend a lot of time fiddling with permissions and sudoers, you should probably run nova as root.
 
@@ -38,12 +38,12 @@ nova will terminate.  You can edit files in the install directory or do a bzr pu
 to run nova after the first install.
 
 Notes
-=====
+-----
 
 The script starts nova-volume in fake mode, so it will not create any actual volumes.
 
 Customization
-=============
+-------------
 
 If you are running nova on bare metal that supports hardware virtualization, you should probably edit the libvirt line near the top
 
