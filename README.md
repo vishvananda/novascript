@@ -10,17 +10,31 @@ Unless you want to spend a lot of time fiddling with permissions and sudoers, yo
 
     sudo -i
 
+You will need disk images for your cloud to run.  You can get one here, but you have to download it by hand:
+
+    http://wiki.openstack.org/InstallInstructions?action=AttachFile&do=get&target=images.tgz
+
+untar the file to create a usable images directory
+
+    tar -zxf /path/to/images.tgz
+
 If you are concerned about security, nova runs just fine inside a virtual machine.  Use the script to install and run the current trunk
 
     ./nova.sh branch
     ./nova.sh install
     ./nova.sh run
 
-The run command will drop you into a screen session with all of the workers running.  You can use eucatools to run commands against the cloud.
+The run command will drop you into a screen session with all of the workers running in different windows  You can use eucatools to run commands against the cloud.
 
     euca-add-keypair test > test.pem
     euca-run-instances -k test -t m1.tiny ami-tiny
     euca-describe-instances
+
+To see output from the various workers, switch screen windows
+
+    <ctrl-a> "
+
+will give you a list of running windows.
 
 When the instance is running, you should be able to ssh to it.
 
