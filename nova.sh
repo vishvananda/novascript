@@ -108,7 +108,7 @@ if [ "$CMD" == "run" ]; then
     screen -x
 
     # shutdown instances
-    . $NOVA_DIR/novarc; euca-describe-instances | grep i- | cut -f2 | xargs euca-terminate-instances$NL
+    . $NOVA_DIR/novarc; euca-describe-instances | grep i- | cut -f2 | xargs euca-terminate-instances
     sleep 2
     # redis simply disconnects on screen kill so force it to die
     killall redis-server
