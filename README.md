@@ -74,6 +74,6 @@ You will need a few bleeding edge packages to make it work.
     sudo apt-get install -y python-software-properties
     sudo add-apt-repository ppa:nova-core/ppa
     sudo apt-get update
-    sudo apt-get install -y libvirt-bin user-mode-linux
+    sudo apt-get install -y python-libvirt libvirt-bin user-mode-linux
 
 If you have any issues, there is usually someone in #openstack on irc.freenode.net that can help you out.
