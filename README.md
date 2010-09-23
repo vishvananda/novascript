@@ -58,8 +58,25 @@ Notes
 
 The script starts nova-volume in fake mode, so it will not create any actual volumes.
 
+if you want to USE_VENV because you have different versions of python packages on your system that you want to keep, you should run install before branch:
+
+    ./nova.sh install
+    ./nova.sh branch
+    ./nova.sh run
+
+Currently the script does not set up natting rules for instances and contacting the metadata api.  These will be part of nova soon.  In the meantime you can do it manually like so:
+
+    iptables -t nat -A PREROUTING -d 169.254.169.254/32 -p tcp -m tcp --dport 80 -j DNAT --to-destination <host_ip_address>:8773
+    iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j SNAT --to-source <host_ip_address>
+    iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
+    iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -d 10.128.0.0/12 -j ACCEPT
+
+If <host_ip_address> is on an interface that routes to the public internet, your instances should be able to communicate with the outside world.
+
 Customization
 -------------
+
+You can make nova use mysql instead of sqlite with USE_MYSQL, it will attempt to install mysql with the specified root password and create a database called nova.
 
 If you are running nova on bare metal that supports hardware virtualization, you should probably edit the libvirt line near the top
 
@@ -69,11 +86,8 @@ If you are running in a virtual machine and software emulation is too slow for y
 
     LIBVIRT_TYPE=uml
 
-You will need a few bleeding edge packages to make it work.
+You will need a few bleeding edge packages to make it work, so you should make sure to use the PPA.
 
-    sudo apt-get install -y python-software-properties
-    sudo add-apt-repository ppa:nova-core/ppa
-    sudo apt-get update
-    sudo apt-get install -y python-libvirt libvirt-bin user-mode-linux
+    USE_PPA=1
 
 If you have any issues, there is usually someone in #openstack on irc.freenode.net that can help you out.

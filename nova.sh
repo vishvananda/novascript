@@ -1,28 +1,58 @@
 #!/usr/bin/env bash
-REDIS=redis-2.0.0-rc4
-BRANCH=lp:nova
+DIR=`pwd`
+CMD=$1
+SOURCE_BRANCH=lp:nova
+if [ -n "$2" ]; then
+    SOURCE_BRANCH=$2
+fi
+DIRNAME=nova
+NOVA_DIR=$DIR/$DIRNAME
+if [ -n "$3" ]; then
+    NOVA_DIR=$DIR/$3
+fi
+# script symlinks to this directory
+IMAGES_DIR=$DIR/images
+USE_PPA=1
 USE_VENV=0
 TEST=0
+USE_MYSQL=1
+MYSQL_PASS=nova
+USE_LDAP=1
 LIBVIRT_TYPE=qemu
 
-DIR=`pwd`
-NOVA_DIR=$DIR/deploy
-REDIS_DIR=$DIR/$REDIS
-IMAGES_DIR=$DIR/images
+if [ "$USE_MYSQL" == 1 ]; then
+    SQL_CONN=mysql://root:$MYSQL_PASS@localhost/nova
+else
+    SQL_CONN=sqlite://$NOVA_DIR/nova.sqlite
+fi
+
+if [ "$USE_LDAP" == 1 ]; then
+    AUTH=LdapDriver
+else
+    REDIS=redis-2.0.0-rc4
+    REDIS_DIR=$DIR/$REDIS
+    AUTH=FakeLdapDriver
+fi
+
 if [ "$USE_VENV" == 1 ]; then
     VENV="$NOVA_DIR/tools/with_venv.sh "
 else
     VENV=""
 fi
-CMD=$1
+
+mkdir -p /etc/nova
+cat >/etc/nova/nova-manage.conf << NOVA_CONF_EOF
+--verbose
+--nodaemon
+--sql_connection=$SQL_CONN
+--auth_driver=nova.auth.ldapdriver.$AUTH
+--libvirt_type=$LIBVIRT_TYPE
+NOVA_CONF_EOF
 
 if [ "$CMD" == "branch" ]; then
     sudo apt-get install -y bzr
-    if [ -n "$2" ]; then
-        BRANCH=$2
-    fi
     rm -rf $NOVA_DIR
-    bzr branch $BRANCH $NOVA_DIR
+    bzr branch $SOURCE_BRANCH $NOVA_DIR
     cd $NOVA_DIR
     mkdir -p $NOVA_DIR/instances
     mkdir -p $NOVA_DIR/networks
@@ -35,12 +65,25 @@ if [ "$CMD" == "branch" ]; then
         cp /usr/lib/python2.6/dist-packages/*libvirt* $NOVA_DIR/.nova-venv/lib/python2.6/site-packages/
         # libxml2 insn't auto installed
         cp /usr/lib/pymodules/python2.6/*libxml2* $NOVA_DIR/.nova-venv/lib/python2.6/site-packages/
-        echo $NOVA_DIR > $NOVA_DIR/.nova-venv/lib/python2.6/site-packages/nova.pth
     fi
 fi
 
 # You should only have to run this once
 if [ "$CMD" == "install" ]; then
+    if [ "$USE_PPA" == 1 ]; then
+        sudo apt-get install -y python-software-properties
+        sudo add-apt-repository ppa:nova-core/ppa
+        sudo apt-get update
+        sudo apt-get install -y user-mode-linux
+    fi
+    if [ "$USE_MYSQL" == 1 ]; then
+        cat <<MYSQL_PRESEED | debconf-set-selections
+mysql-server-5.1 mysql-server/root_password password $MYSQL_PASS
+mysql-server-5.1 mysql-server/root_password_again password $MYSQL_PASS
+mysql-server-5.1 mysql-server/start_on_boot boolean true
+MYSQL_PRESEED
+        apt-get install -y mysql-server python-mysqldb
+    fi
     sudo apt-get install -y screen aoetools euca2ools vlan curl rabbitmq-server
     sudo apt-get install -y dnsmasq vblade-persist kpartx kvm libvirt-bin
     sudo modprobe aoe
@@ -51,14 +94,15 @@ if [ "$CMD" == "install" ]; then
         sudo easy_install pip
         sudo pip install -r $NOVA_DIR/tools/pip-requires
         sudo pip install  "http://nova.openstack.org/Twisted-10.0.0Nova.tar.gz"
-        echo $NOVA_DIR | sudo tee /usr/lib/python2.6/dist-packages/nova.pth
     fi
-    rm -rf $REDIS
-    curl http://redis.googlecode.com/files/$REDIS.tar.gz -fo $REDIS.tar.gz
-    tar xvfz $REDIS.tar.gz
-    cd $REDIS
-    make
-    cd $DIR
+    if [ "$USE_LDAP" == 0 ]; then
+        rm -rf $REDIS
+        curl http://redis.googlecode.com/files/$REDIS.tar.gz -fo $REDIS.tar.gz
+        tar xvfz $REDIS.tar.gz
+        cd $REDIS
+        make
+        cd $DIR
+    fi
 fi
 
 NL=`echo -ne '\015'`
@@ -70,18 +114,26 @@ function screen_it {
 
 if [ "$CMD" == "run" ]; then
     killall dnsmasq
-    rm nova.sqlite
-    rm dump.rdb
+    screen -d -m -S nova -t nova
+    sleep 1
+    if [ "$USE_MYSQL" == 1 ]; then
+        mysql -p$MYSQL_PASS -e 'DROP DATABASE nova;'
+        mysql -p$MYSQL_PASS -e 'CREATE DATABASE nova;'
+    else
+        rm nova.sqlite
+    fi
+    if [ "$USE_LDAP" == 1 ]; then
+        sudo $NOVA_DIR/nova/auth/slap.sh
+    else
+        rm dump.rdb
+        screen_it redis "$DIR/$REDIS/redis-server"
+    fi
     rm -rf $NOVA_DIR/instances
     mkdir -p $NOVA_DIR/instances
     rm -rf $NOVA_DIR/networks
     mkdir -p $NOVA_DIR/networks
     $NOVA_DIR/tools/clean-vlans
     ln -s $IMAGES_DIR $NOVA_DIR/images
-    # start redis
-    screen -d -m -S nova -t nova
-    sleep 1
-    screen_it redis "$DIR/$REDIS/redis-server"
 
     if [ "$TEST" == 1 ]; then
         cd $NOVA_DIR
@@ -98,25 +150,25 @@ if [ "$CMD" == "run" ]; then
 
     # nova api crashes if we start it with a regular screen command,
     # so send the start command by forcing text into the window.
-    screen_it api "$VENV$NOVA_DIR/bin/nova-api-new --verbose"
-    screen_it objectstore "$VENV$NOVA_DIR/bin/nova-objectstore --verbose --nodaemon"
-    screen_it compute "$VENV$NOVA_DIR/bin/nova-compute --verbose --nodaemon --libvirt_type=$LIBVIRT_TYPE"
-    screen_it network "$VENV$NOVA_DIR/bin/nova-network --verbose --nodaemon"
-    screen_it scheduler "$VENV$NOVA_DIR/bin/nova-scheduler --verbose --nodaemon"
-    screen_it volume "$VENV$NOVA_DIR/bin/nova-volume --verbose --nodaemon --volume_driver=nova.volume.driver.FakeAOEDriver"
-    screen_it test ". $NOVA_DIR/novarc$NL"
+    screen_it api "$VENV$NOVA_DIR/bin/nova-api --flagfile=/etc/nova/nova-manage.conf"
+    screen_it objectstore "$VENV$NOVA_DIR/bin/nova-objectstore --flagfile=/etc/nova/nova-manage.conf"
+    screen_it compute "$VENV$NOVA_DIR/bin/nova-compute --flagfile=/etc/nova/nova-manage.conf"
+    screen_it network "$VENV$NOVA_DIR/bin/nova-network --flagfile=/etc/nova/nova-manage.conf"
+    screen_it scheduler "$VENV$NOVA_DIR/bin/nova-scheduler --flagfile=/etc/nova/nova-manage.conf"
+    screen_it volume "$VENV$NOVA_DIR/bin/nova-volume --flagfile=/etc/nova/nova-manage.conf"
+    screen_it test ". $NOVA_DIR/novarc"
     screen -x
 
     # shutdown instances
     . $NOVA_DIR/novarc; euca-describe-instances | grep i- | cut -f2 | xargs euca-terminate-instances
     sleep 2
-    # redis simply disconnects on screen kill so force it to die
-    killall redis-server
+    if [ "$USE_LDAP" == 1 ]; then
+        # redis simply disconnects on screen kill so force it to die
+        killall redis-server
+    fi
     # nova-api doesn't like being killed, so try to ctrl-c it
     screen -S nova -p api -X stuff ""
     sleep 1
     screen -S nova -p api -X stuff ""
     screen -S nova -X quit
 fi
-
-
