@@ -15,9 +15,9 @@ IMAGES_DIR=$DIR/images
 USE_PPA=1
 USE_VENV=0
 TEST=0
-USE_MYSQL=1
+USE_MYSQL=0
 MYSQL_PASS=nova
-USE_LDAP=1
+USE_LDAP=0
 LIBVIRT_TYPE=qemu
 
 if [ "$USE_MYSQL" == 1 ]; then
@@ -162,7 +162,7 @@ if [ "$CMD" == "run" ]; then
     # shutdown instances
     . $NOVA_DIR/novarc; euca-describe-instances | grep i- | cut -f2 | xargs euca-terminate-instances
     sleep 2
-    if [ "$USE_LDAP" == 1 ]; then
+    if [ "$USE_LDAP" == 0 ]; then
         # redis simply disconnects on screen kill so force it to die
         killall redis-server
     fi
