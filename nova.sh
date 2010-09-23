@@ -23,7 +23,7 @@ LIBVIRT_TYPE=qemu
 if [ "$USE_MYSQL" == 1 ]; then
     SQL_CONN=mysql://root:$MYSQL_PASS@localhost/nova
 else
-    SQL_CONN=sqlite://$NOVA_DIR/nova.sqlite
+    SQL_CONN=sqlite:///$NOVA_DIR/nova.sqlite
 fi
 
 if [ "$USE_LDAP" == 1 ]; then
@@ -44,6 +44,7 @@ mkdir -p /etc/nova
 cat >/etc/nova/nova-manage.conf << NOVA_CONF_EOF
 --verbose
 --nodaemon
+--max_networks=5
 --sql_connection=$SQL_CONN
 --auth_driver=nova.auth.ldapdriver.$AUTH
 --libvirt_type=$LIBVIRT_TYPE
@@ -120,7 +121,7 @@ if [ "$CMD" == "run" ]; then
         mysql -p$MYSQL_PASS -e 'DROP DATABASE nova;'
         mysql -p$MYSQL_PASS -e 'CREATE DATABASE nova;'
     else
-        rm nova.sqlite
+        rm $NOVA_DIR/nova.sqlite
     fi
     if [ "$USE_LDAP" == 1 ]; then
         sudo $NOVA_DIR/nova/auth/slap.sh
