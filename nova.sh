@@ -6,7 +6,7 @@ TEST=0
 LIBVIRT_TYPE=qemu
 
 DIR=`pwd`
-NOVA_DIR=$DIR/nova
+NOVA_DIR=$DIR/deploy
 REDIS_DIR=$DIR/$REDIS
 IMAGES_DIR=$DIR/images
 if [ "$USE_VENV" == 1 ]; then
@@ -17,7 +17,7 @@ fi
 CMD=$1
 
 if [ "$CMD" == "branch" ]; then
-    apt-get install -y bzr
+    sudo apt-get install -y bzr
     if [ -n "$2" ]; then
         BRANCH=$2
     fi
@@ -41,7 +41,7 @@ fi
 
 # You should only have to run this once
 if [ "$CMD" == "install" ]; then
-    sudo apt-get install -y aoetools euca2ools vlan curl rabbitmq-server
+    sudo apt-get install -y screen aoetools euca2ools vlan curl rabbitmq-server
     sudo apt-get install -y dnsmasq vblade-persist kpartx kvm libvirt-bin
     sudo modprobe aoe
     sudo modprobe kvm
@@ -98,7 +98,7 @@ if [ "$CMD" == "run" ]; then
 
     # nova api crashes if we start it with a regular screen command,
     # so send the start command by forcing text into the window.
-    screen_it api "$VENV$NOVA_DIR/bin/nova-api --verbose"
+    screen_it api "$VENV$NOVA_DIR/bin/nova-api-new --verbose"
     screen_it objectstore "$VENV$NOVA_DIR/bin/nova-objectstore --verbose --nodaemon"
     screen_it compute "$VENV$NOVA_DIR/bin/nova-compute --verbose --nodaemon --libvirt_type=$LIBVIRT_TYPE"
     screen_it network "$VENV$NOVA_DIR/bin/nova-network --verbose --nodaemon"
