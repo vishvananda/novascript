@@ -174,3 +174,13 @@ if [ "$CMD" == "run" ] || [ "$CMD" == "clean" ]; then
     fi
     screen -S nova -X quit
 fi
+
+if [ "$CMD" == "scrub" ]; then
+    /srv/cloud/nova/tools/clean-vlans
+    if [ "$LIBVIRT_TYPE" == "uml" ]; then
+        virsh -c uml:///system list | grep i- | awk '{print \$1}' | xargs -n1 virsh -c uml:///system destroy
+    else
+        virsh list | grep i- | awk '{print \$1}' | xargs -n1 virsh destroy
+    fi
+    vblade-persist ls | grep vol- | awk '{print \$1\" \"\$2}' | xargs -n2 vblade-persist destroy
+fi
