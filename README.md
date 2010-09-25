@@ -47,11 +47,19 @@ When you exit screen
 
     <ctrl-a> <ctrl-d>
 
-nova will terminate.  You can edit files in the install directory or do a bzr pull to pick up new versions. You only need to do
+nova will terminate.  It may take a while for nova to finish cleaning up.  If you exit the process before it is done because there were some problems in your build, you may have to clean up the nova processes manually.  If you had any instances running, you can attempt to kill them through the api:
+
+    ./nova.sh terminate
+
+Then you can destroy the screen:
+
+    ./nova.sh clean
+
+You can edit files in the install directory or do a bzr pull to pick up new versions. You only need to do
 
     ./nova.sh run
 
-to run nova after the first install.
+to run nova after the first install.  The database should be cleaned up on each run.
 
 Notes
 -----

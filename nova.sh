@@ -44,6 +44,7 @@ mkdir -p /etc/nova
 cat >/etc/nova/nova-manage.conf << NOVA_CONF_EOF
 --verbose
 --nodaemon
+--FAKE_subdomain=ec2
 --max_networks=5
 --sql_connection=$SQL_CONN
 --auth_driver=nova.auth.ldapdriver.$AUTH
@@ -160,16 +161,16 @@ if [ "$CMD" == "run" ]; then
     screen_it test ". $NOVA_DIR/novarc"
     screen -x
 
+if [ "$CMD" == "run" ] || [ "$CMD" == "terminate" ]; then
     # shutdown instances
     . $NOVA_DIR/novarc; euca-describe-instances | grep i- | cut -f2 | xargs euca-terminate-instances
     sleep 2
+fi
+
+if [ "$CMD" == "run" ] || [ "$CMD" == "clean" ]; then
     if [ "$USE_LDAP" == 0 ]; then
         # redis simply disconnects on screen kill so force it to die
         killall redis-server
     fi
-    # nova-api doesn't like being killed, so try to ctrl-c it
-    screen -S nova -p api -X stuff ""
-    sleep 1
-    screen -S nova -p api -X stuff ""
     screen -S nova -X quit
 fi
