@@ -160,6 +160,7 @@ if [ "$CMD" == "run" ]; then
     screen_it volume "$VENV$NOVA_DIR/bin/nova-volume --flagfile=/etc/nova/nova-manage.conf"
     screen_it test ". $NOVA_DIR/novarc"
     screen -x
+fi
 
 if [ "$CMD" == "run" ] || [ "$CMD" == "terminate" ]; then
     # shutdown instances
