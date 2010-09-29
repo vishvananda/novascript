@@ -12,14 +12,6 @@ Unless you want to spend a lot of time fiddling with permissions and sudoers, yo
 
 If you are concerned about security, nova runs just fine inside a virtual machine.
 
-You will need disk images for your cloud to run.  You can get one here, but you have to download it by hand:
-
-    http://wiki.openstack.org/InstallInstructions?action=AttachFile&do=get&target=images.tgz
-
-untar the file to create a usable images directory
-
-    tar -zxf /path/to/images.tgz
-
 Use the script to install and run the current trunk. You can also specify a specific branch by putting lp:~someone/nova/some-branch after the branch command
 
     ./nova.sh branch
@@ -76,14 +68,15 @@ if you want to USE_VENV because you have different versions of python packages o
     ./nova.sh branch
     ./nova.sh run
 
-Currently the script does not set up natting rules for instances and contacting the metadata api.  These will be part of nova soon.  In the meantime you can do it manually like so:
+A sample image should be downloaded by the script, but if necessary you can download it by hand:
 
-    iptables -t nat -A PREROUTING -d 169.254.169.254/32 -p tcp -m tcp --dport 80 -j DNAT --to-destination <host_ip_address>:8773
-    iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j SNAT --to-source <host_ip_address>
-    iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
-    iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -d 10.128.0.0/12 -j ACCEPT
+    wget http://c2477062.cdn.cloudfiles.rackspacecloud.com/images.tgz
 
-If <host_ip_address> is on an interface that routes to the public internet, your instances should be able to communicate with the outside world.
+untar the file to create a usable images directory
+
+    tar -zxf /path/to/images.tgz
+
+If you want to be able to contact the metadata server and route to the outside world from instances, you will need to make sure $HOST_IP is set properly.  The script attemps to grab it from ifconfig, but if you have multiple adapters set up, it may fail.  Fix it with export HOST_IP="<your public ip>":
 
 Customization
 -------------

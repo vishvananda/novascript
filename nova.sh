@@ -10,8 +10,13 @@ NOVA_DIR=$DIR/$DIRNAME
 if [ -n "$3" ]; then
     NOVA_DIR=$DIR/$3
 fi
-# script symlinks to this directory
-IMAGES_DIR=$DIR/images
+
+if [ -n "$HOST_IP" ]; then
+    # NOTE(vish): This will just get the first ip in the list, so if you
+    #             have more than one eth device set up, this will fail, and
+    #             you should explicitly set HOST_IP in your environment
+    HOST_IP=`ifconfig  | grep -m 1 'inet addr:'| cut -d: -f2 | awk '{print $1}'`
+fi
 USE_PPA=1
 USE_VENV=0
 TEST=0
@@ -44,8 +49,10 @@ mkdir -p /etc/nova
 cat >/etc/nova/nova-manage.conf << NOVA_CONF_EOF
 --verbose
 --nodaemon
+--dhcpbridge_flagfile=/etc/nova/nova-manage.conf
 --FAKE_subdomain=ec2
---max_networks=5
+--cc_host=$HOST_IP
+--routing_source_ip=$HOST_IP
 --sql_connection=$SQL_CONN
 --auth_driver=nova.auth.ldapdriver.$AUTH
 --libvirt_type=$LIBVIRT_TYPE
@@ -58,7 +65,6 @@ if [ "$CMD" == "branch" ]; then
     cd $NOVA_DIR
     mkdir -p $NOVA_DIR/instances
     mkdir -p $NOVA_DIR/networks
-    ln -s $IMAGES_DIR $NOVA_DIR/images
     if [ "$USE_VENV" == 1 ]; then
         sudo apt-get build-dep -y python-m2crypto
         sudo easy_install virtualenv
@@ -105,6 +111,8 @@ MYSQL_PRESEED
         make
         cd $DIR
     fi
+    wget http://c2477062.cdn.cloudfiles.rackspacecloud.com/images.tgz
+    tar -C $DIR -zxf images.tgz
 fi
 
 NL=`echo -ne '\015'`
@@ -135,7 +143,9 @@ if [ "$CMD" == "run" ]; then
     rm -rf $NOVA_DIR/networks
     mkdir -p $NOVA_DIR/networks
     $NOVA_DIR/tools/clean-vlans
-    ln -s $IMAGES_DIR $NOVA_DIR/images
+    if [ ! -d "$NOVA_DIR/images" ]; then
+        ln -s $DIR/images $NOVA_DIR/images
+    fi
 
     if [ "$TEST" == 1 ]; then
         cd $NOVA_DIR
@@ -174,6 +184,8 @@ if [ "$CMD" == "run" ] || [ "$CMD" == "clean" ]; then
         killall redis-server
     fi
     screen -S nova -X quit
+    rm *.pid*
+    $NOVA_DIR/tools/setup_iptables.sh clear
 fi
 
 if [ "$CMD" == "scrub" ]; then
