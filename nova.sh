@@ -11,7 +11,7 @@ if [ -n "$3" ]; then
     NOVA_DIR=$DIR/$3
 fi
 
-if [ -n "$HOST_IP" ]; then
+if [ ! -n "$HOST_IP" ]; then
     # NOTE(vish): This will just get the first ip in the list, so if you
     #             have more than one eth device set up, this will fail, and
     #             you should explicitly set HOST_IP in your environment
