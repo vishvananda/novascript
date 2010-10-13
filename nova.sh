@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 DIR=`pwd`
 CMD=$1
-SOURCE_BRANCH=lp:nova
+SOURCE_BRANCH=lp:~anso/nova/deploy
 if [ -n "$2" ]; then
     SOURCE_BRANCH=$2
 fi
-DIRNAME=nova
+DIRNAME=deploy
 NOVA_DIR=$DIR/$DIRNAME
 if [ -n "$3" ]; then
     NOVA_DIR=$DIR/$3
@@ -52,9 +52,12 @@ cat >/etc/nova/nova-manage.conf << NOVA_CONF_EOF
 --dhcpbridge_flagfile=/etc/nova/nova-manage.conf
 --FAKE_subdomain=ec2
 --cc_host=$HOST_IP
+--cc_dmz=$HOST_IP
 --routing_source_ip=$HOST_IP
 --sql_connection=$SQL_CONN
 --auth_driver=nova.auth.ldapdriver.$AUTH
+#--volume_manager=nova.volume.manager.ISCSIManager
+#--volume_driver=nova.volume.driver.ISCSIDriver
 --libvirt_type=$LIBVIRT_TYPE
 NOVA_CONF_EOF
 
@@ -160,7 +163,7 @@ if [ "$CMD" == "run" ]; then
     # export environment variables for project 'admin' and user 'admin'
     $VENV$NOVA_DIR/bin/nova-manage project environment admin admin $NOVA_DIR/novarc
     # create 3 small networks
-    $VENV$NOVA_DIR/bin/nova-manage network create 3 16
+    $VENV$NOVA_DIR/bin/nova-manage network create 10.128.0.0/16  3 16
 
     # nova api crashes if we start it with a regular screen command,
     # so send the start command by forcing text into the window.
