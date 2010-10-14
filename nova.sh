@@ -160,7 +160,7 @@ if [ "$CMD" == "run" ]; then
     # export environment variables for project 'admin' and user 'admin'
     $VENV$NOVA_DIR/bin/nova-manage project environment admin admin $NOVA_DIR/novarc
     # create 3 small networks
-    $VENV$NOVA_DIR/bin/nova-manage network create 0 3 16
+    $VENV$NOVA_DIR/bin/nova-manage network create 10.0.0.0/8 3 16
 
     # nova api crashes if we start it with a regular screen command,
     # so send the start command by forcing text into the window.
