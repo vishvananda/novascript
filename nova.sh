@@ -56,8 +56,8 @@ cat >/etc/nova/nova-manage.conf << NOVA_CONF_EOF
 --routing_source_ip=$HOST_IP
 --sql_connection=$SQL_CONN
 --auth_driver=nova.auth.ldapdriver.$AUTH
-#--volume_manager=nova.volume.manager.ISCSIManager
-#--volume_driver=nova.volume.driver.ISCSIDriver
+--volume_manager=nova.volume.manager.ISCSIManager
+--volume_driver=nova.volume.driver.ISCSIDriver
 --libvirt_type=$LIBVIRT_TYPE
 NOVA_CONF_EOF
 
@@ -174,6 +174,11 @@ if [ "$CMD" == "run" ]; then
     screen_it scheduler "$VENV$NOVA_DIR/bin/nova-scheduler --flagfile=/etc/nova/nova-manage.conf"
     screen_it volume "$VENV$NOVA_DIR/bin/nova-volume --flagfile=/etc/nova/nova-manage.conf"
     screen_it test ". $NOVA_DIR/novarc"
+
+    sleep 3
+
+    $VENV$NOVA_DIR/bin/nova-manage service enable `hostname` nova-compute
+    $VENV$NOVA_DIR/bin/nova-manage service enable `hostname` nova-volume
     screen -x
 fi
 
