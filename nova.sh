@@ -65,10 +65,9 @@ if [ "$CMD" == "install" ]; then
     sudo apt-get install -y python-software-properties
     sudo add-apt-repository ppa:nova-core/ppa
     sudo apt-get update
-    sudo apt-get install -y dnsmasq vblade-persist kpartx kvm gawk iptables ebtables
+    sudo apt-get install -y dnsmasq kpartx kvm gawk iptables ebtables
     sudo apt-get install -y user-mode-linux kvm libvirt-bin
-    sudo apt-get install -y screen aoetools euca2ools vlan curl rabbitmq-server
-    sudo modprobe aoe
+    sudo apt-get install -y screen euca2ools vlan curl rabbitmq-server open-iscsi iscsitarget
     sudo modprobe kvm
     sudo /etc/init.d/libvirt-bin restart
     sudo apt-get install -y python-twisted python-sqlalchemy python-mox python-greenlet python-carrot
