@@ -152,7 +152,7 @@ if [ "$CMD" == "run" ] || [ "$CMD" == "clean" ]; then
 fi
 
 if [ "$CMD" == "scrub" ]; then
-    /srv/cloud/nova/tools/clean-vlans
+    $NOVA_DIR/tools/clean-vlans
     if [ "$LIBVIRT_TYPE" == "uml" ]; then
         virsh -c uml:///system list | grep i- | awk '{print \$1}' | xargs -n1 virsh -c uml:///system destroy
     else
