@@ -60,14 +60,6 @@ to run nova after the first install.  The database should be cleaned up on each 
 Notes
 -----
 
-The script starts nova-volume in fake mode, so it will not create any actual volumes.
-
-if you want to USE_VENV because you have different versions of python packages on your system that you want to keep, you should run install before branch:
-
-    ./nova.sh install
-    ./nova.sh branch
-    ./nova.sh run
-
 A sample image should be downloaded by the script, but if necessary you can download it by hand:
 
     wget http://c2477062.cdn.cloudfiles.rackspacecloud.com/images.tgz
@@ -90,9 +82,5 @@ If you are running nova on bare metal that supports hardware virtualization, you
 If you are running in a virtual machine and software emulation is too slow for you, you can use user mode linux.
 
     LIBVIRT_TYPE=uml
-
-You will need a few bleeding edge packages to make it work, so you should make sure to use the PPA.
-
-    USE_PPA=1
 
 If you have any issues, there is usually someone in #openstack on irc.freenode.net that can help you out.
