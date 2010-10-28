@@ -20,7 +20,7 @@ fi
 TEST=0
 USE_MYSQL=0
 MYSQL_PASS=nova
-USE_LDAP=0
+USE_LDAP=1
 LIBVIRT_TYPE=qemu
 
 if [ "$USE_MYSQL" == 1 ]; then
@@ -46,8 +46,6 @@ cat >/etc/nova/nova-manage.conf << NOVA_CONF_EOF
 --routing_source_ip=$HOST_IP
 --sql_connection=$SQL_CONN
 --auth_driver=nova.auth.$AUTH
---volume_manager=nova.volume.manager.ISCSIManager
---volume_driver=nova.volume.driver.ISCSIDriver
 --libvirt_type=$LIBVIRT_TYPE
 NOVA_CONF_EOF
 
@@ -110,6 +108,9 @@ if [ "$CMD" == "run" ]; then
     rm -rf $NOVA_DIR/networks
     mkdir -p $NOVA_DIR/networks
     $NOVA_DIR/tools/clean-vlans
+    sleep 3
+    ifdown eth0
+    ifup eth0
     if [ ! -d "$NOVA_DIR/images" ]; then
         ln -s $DIR/images $NOVA_DIR/images
     fi
