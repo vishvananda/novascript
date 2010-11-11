@@ -17,11 +17,31 @@ if [ ! -n "$HOST_IP" ]; then
     #             you should explicitly set HOST_IP in your environment
     HOST_IP=`ifconfig  | grep -m 1 'inet addr:'| cut -d: -f2 | awk '{print $1}'`
 fi
-TEST=0
-USE_MYSQL=0
-MYSQL_PASS=nova
-USE_LDAP=0
-LIBVIRT_TYPE=qemu
+
+if [ ! -n "$USE_MYSQL" ]; then
+    # NOTE(heckj): check USE_MYSQL and set to off by default if it's not set
+    USE_MYSQL=0
+fi
+
+if [ ! -n "$MYSQL_PASS" ]; then
+    # NOTE(heckj): check MYSQL_PASS and set to 'nova' by default if it's not set
+    MYSQL_PASS=nova
+fi
+
+if [ ! -n "$TEST" ]; then
+    # NOTE(heckj): check TEST and set to '0' by default if it's not set
+    TEST=0
+fi
+
+if [ ! -n "$USE_LDAP" ]; then
+    # NOTE(heckj): check USE_LDAP and set to '0' by default if it's not set
+    USE_LDAP=0
+fi
+
+if [ ! -n "$LIBVIRT_TYPE" ]; then
+    # NOTE(heckj): check LIBVIRT_TYPE and set to 'qemu' by default if it's not set
+    LIBVIRT_TYPE=qemu
+fi
 
 if [ "$USE_MYSQL" == 1 ]; then
     SQL_CONN=mysql://root:$MYSQL_PASS@localhost/nova
