@@ -65,6 +65,8 @@ if [ "$CMD" == "install" ]; then
     sudo apt-get install -y dnsmasq open-iscsi kpartx kvm gawk iptables ebtables
     sudo apt-get install -y user-mode-linux kvm libvirt-bin
     sudo apt-get install -y screen iscsitarget euca2ools vlan curl rabbitmq-server
+    echo "ISCSITARGET_ENABLE=true" | sudo tee /etc/default/iscsitarget
+    sudo /etc/init.d/iscsitarget restart
     sudo modprobe kvm
     sudo /etc/init.d/libvirt-bin restart
     sudo apt-get install -y python-twisted python-sqlalchemy python-mox python-greenlet python-carrot
@@ -135,7 +137,7 @@ if [ "$CMD" == "run" ]; then
     screen_it scheduler "$NOVA_DIR/bin/nova-scheduler --flagfile=/etc/nova/nova-manage.conf"
     screen_it volume "$NOVA_DIR/bin/nova-volume --flagfile=/etc/nova/nova-manage.conf"
     screen_it test ". $NOVA_DIR/novarc"
-    screen -x
+    screen -S nova -x
 fi
 
 if [ "$CMD" == "run" ] || [ "$CMD" == "terminate" ]; then
