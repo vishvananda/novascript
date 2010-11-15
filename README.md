@@ -70,6 +70,17 @@ untar the file to create a usable images directory
 
 If you want to be able to contact the metadata server and route to the outside world from instances, you will need to make sure $HOST_IP is set properly.  The script attemps to grab it from ifconfig, but if you have multiple adapters set up, it may fail.  Fix it with export HOST_IP="<your public ip>":
 
+If you want to use volumes, you will need to create a volume group called nova-volumes before starting the workers.  If you have a spare hard disk attached to your dev box at /dev/sdb (virtual or otherwise), you can create a logical volume with one command:
+
+    sudo vgcreate nova-volumes /dev/sdb
+
+If you don't have a spare drive, you can create a flat file to back the volume group. Here is an example for a 100G volume store:
+
+    dd if=/dev/zero of=volumes bs=1G skip=99 count=1
+    mkfs.ext4 -F volumes
+    DEV=`sudo losetup -f --show volumes`
+    sudo vgcreate nova-volumes $DEV
+
 Customization
 -------------
 
