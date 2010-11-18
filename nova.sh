@@ -154,12 +154,13 @@ if [ "$CMD" == "run" ] || [ "$CMD" == "terminate" ]; then
     # shutdown instances
     . $NOVA_DIR/novarc; euca-describe-instances | grep i- | cut -f2 | xargs euca-terminate-instances
     sleep 2
+    # delete volumes
+    . $NOVA_DIR/novarc; euca-describe-volumes | grep vol- | cut -f2 | xargs -n1 euca-delete-volume
 fi
 
 if [ "$CMD" == "run" ] || [ "$CMD" == "clean" ]; then
     screen -S nova -X quit
     rm *.pid*
-    $NOVA_DIR/tools/setup_iptables.sh clear
 fi
 
 if [ "$CMD" == "scrub" ]; then
