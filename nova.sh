@@ -72,9 +72,10 @@ if [ "$CMD" == "install" ]; then
     sudo apt-get install -y python-software-properties
     sudo add-apt-repository ppa:nova-core/ppa
     sudo apt-get update
-    sudo apt-get install -y dnsmasq open-iscsi kpartx kvm gawk iptables ebtables
+    sudo apt-get install -y dnsmasq kpartx kvm gawk iptables ebtables
     sudo apt-get install -y user-mode-linux kvm libvirt-bin
-    sudo apt-get install -y screen iscsitarget euca2ools vlan curl rabbitmq-server
+    sudo apt-get install -y screen euca2ools vlan curl rabbitmq-server
+    sudo apt-get install -y lvm2 iscsitarget open-iscsi
     echo "ISCSITARGET_ENABLE=true" | sudo tee /etc/default/iscsitarget
     sudo /etc/init.d/iscsitarget restart
     sudo modprobe kvm
