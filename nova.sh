@@ -23,10 +23,11 @@ MYSQL_PASS=${MYSQL_PASS:-nova}
 TEST=${TEST:-0}
 USE_LDAP=${USE_LDAP:-0}
 LIBVIRT_TYPE=${LIBVIRT_TYPE:-qemu}
-NET_MAN=${NET_MAN:-VlanManager}
-# NOTE(vish): If you are using FlatDHCP make sure that this is not your
-#             public interface. You can comment it out for local usage
-BRIDGE_DEV=eth0
+NET_MAN=${NET_MAN:-FlatDHCPManager}
+# NOTE(vish): If you are using FlatDHCP on multiple hosts, set the interface
+#             below but make sure that the interface doesn't already have an
+#             ip or you risk breaking things.
+# FLAT_INTERFACE=eth0
 
 if [ "$USE_MYSQL" == 1 ]; then
     SQL_CONN=mysql://root:$MYSQL_PASS@localhost/nova
