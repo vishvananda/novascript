@@ -54,8 +54,8 @@ cat >/etc/nova/nova-manage.conf << NOVA_CONF_EOF
 --libvirt_type=$LIBVIRT_TYPE
 NOVA_CONF_EOF
 
-if [ -n "$BRIDGE_DEV" ]; then
-    echo "--bridge_dev=$BRIDGE_DEV" >>/etc/nova/nova-manage.conf
+if [ -n "$FLAT_INTERFACE" ]; then
+    echo "--flat_interface=$FLAT_INTERFACE" >>/etc/nova/nova-manage.conf
 fi
 
 if [ "$CMD" == "branch" ]; then
