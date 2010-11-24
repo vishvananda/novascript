@@ -23,7 +23,7 @@ MYSQL_PASS=${MYSQL_PASS:-nova}
 TEST=${TEST:-0}
 USE_LDAP=${USE_LDAP:-0}
 LIBVIRT_TYPE=${LIBVIRT_TYPE:-qemu}
-NET_MAN=${NET_MAN:-FlatDHCPManager}
+NET_MAN=${NET_MAN:-VlanManager}
 # NOTE(vish): If you are using FlatDHCP on multiple hosts, set the interface
 #             below but make sure that the interface doesn't already have an
 #             ip or you risk breaking things.
