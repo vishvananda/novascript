@@ -91,7 +91,7 @@ mysql-server-5.1 mysql-server/start_on_boot boolean true
 MYSQL_PRESEED
         apt-get install -y mysql-server python-mysqldb
     fi
-    wget http://c2477062.cdn.cloudfiles.rackspacecloud.com/images.tgz
+    wget -c http://c2477062.cdn.cloudfiles.rackspacecloud.com/images.tgz
     tar -C $DIR -zxf images.tgz
 fi
 
