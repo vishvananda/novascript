@@ -53,6 +53,7 @@ cat >/etc/nova/nova-manage.conf << NOVA_CONF_EOF
 --sql_connection=$SQL_CONN
 --auth_driver=nova.auth.$AUTH
 --libvirt_type=$LIBVIRT_TYPE
+--use_project_ca
 NOVA_CONF_EOF
 
 if [ -n "$FLAT_INTERFACE" ]; then
