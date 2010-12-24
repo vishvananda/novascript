@@ -81,7 +81,8 @@ if [ "$CMD" == "install" ]; then
     sudo modprobe kvm
     sudo /etc/init.d/libvirt-bin restart
     sudo apt-get install -y python-twisted python-sqlalchemy python-mox python-greenlet python-carrot
-    sudo apt-get install -y python-daemon python-eventlet python-gflags python-ipy python-cheetah
+    sudo apt-get install -y python-daemon python-eventlet python-gflags python-ipy 
+    sudo apt-get install -y python-cheetah
     sudo apt-get install -y python-libvirt python-libxml2 python-routes
     if [ "$USE_MYSQL" == 1 ]; then
         cat <<MYSQL_PRESEED | debconf-set-selections
