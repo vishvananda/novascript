@@ -76,14 +76,9 @@ If you want to use volumes, you will need to create a volume group called nova-v
 
 If you don't have a spare drive, you can create a flat file to back the volume group. Here is an example for a 100G volume store:
 
-    dd if=/dev/zero of=volumes bs=1G skip=99 count=1
+    dd if=/dev/zero of=volumes bs=1G seek=99 count=1
     DEV=`sudo losetup -f --show volumes`
     sudo vgcreate nova-volumes $DEV
-
-You may have to create a test volume in order for /dev/nova-volumes to show up:
-
-    sudo lvcreate -L 1G --name test nova-volumes
-    sudo lvremove /dev/nova-volumes/test
 
 Customization
 -------------
