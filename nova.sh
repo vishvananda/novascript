@@ -5,7 +5,7 @@ SOURCE_BRANCH=lp:nova
 if [ -n "$2" ]; then
     SOURCE_BRANCH=$2
 fi
-DIRNAME=nova
+DIRNAME=trunk
 NOVA_DIR=$DIR/$DIRNAME
 if [ -n "$3" ]; then
     NOVA_DIR=$DIR/$3
@@ -72,17 +72,20 @@ if [ "$CMD" == "install" ]; then
     sudo apt-get install -y python-software-properties
     sudo add-apt-repository ppa:nova-core/trunk
     sudo apt-get update
-    sudo apt-get install -y dnsmasq kpartx kvm gawk iptables ebtables
+    sudo apt-get install -y dnsmasq-base kpartx kvm gawk iptables ebtables
     sudo apt-get install -y user-mode-linux kvm libvirt-bin
     sudo apt-get install -y screen euca2ools vlan curl rabbitmq-server
     sudo apt-get install -y lvm2 iscsitarget open-iscsi
+    sudo apt-get install -y socat
     echo "ISCSITARGET_ENABLE=true" | sudo tee /etc/default/iscsitarget
     sudo /etc/init.d/iscsitarget restart
     sudo modprobe kvm
     sudo /etc/init.d/libvirt-bin restart
+    sudo modprobe nbd
     sudo apt-get install -y python-twisted python-sqlalchemy python-mox python-greenlet python-carrot
     sudo apt-get install -y python-daemon python-eventlet python-gflags python-ipy python-cheetah
     sudo apt-get install -y python-libvirt python-libxml2 python-routes
+    sudo apt-get install -y python-netaddr
     if [ "$USE_MYSQL" == 1 ]; then
         cat <<MYSQL_PRESEED | debconf-set-selections
 mysql-server-5.1 mysql-server/root_password password $MYSQL_PASS
@@ -157,6 +160,7 @@ if [ "$CMD" == "run" ] || [ "$CMD" == "terminate" ]; then
     sleep 2
     # delete volumes
     . $NOVA_DIR/novarc; euca-describe-volumes | grep vol- | cut -f2 | xargs -n1 euca-delete-volume
+    sleep 2
 fi
 
 if [ "$CMD" == "run" ] || [ "$CMD" == "clean" ]; then
