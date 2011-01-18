@@ -84,8 +84,8 @@ if [ "$CMD" == "install" ]; then
     sudo modprobe nbd
     sudo apt-get install -y python-twisted python-sqlalchemy python-mox python-greenlet python-carrot
     sudo apt-get install -y python-daemon python-eventlet python-gflags python-ipy python-cheetah
-    sudo apt-get install -y python-libvirt python-libxml2 python-routes
-    sudo apt-get install -y python-netaddr
+    sudo apt-get install -y python-libvirt python-libxml2 python-routes python-paste
+    sudo apt-get install -y python-netaddr python-tempita python-migrate python-pastedeploy
     if [ "$USE_MYSQL" == 1 ]; then
         cat <<MYSQL_PRESEED | debconf-set-selections
 mysql-server-5.1 mysql-server/root_password password $MYSQL_PASS
