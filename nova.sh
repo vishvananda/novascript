@@ -5,7 +5,7 @@ SOURCE_BRANCH=lp:nova
 if [ -n "$2" ]; then
     SOURCE_BRANCH=$2
 fi
-DIRNAME=trunk
+DIRNAME=nova
 NOVA_DIR=$DIR/$DIRNAME
 if [ -n "$3" ]; then
     NOVA_DIR=$DIR/$3
@@ -15,13 +15,17 @@ if [ ! -n "$HOST_IP" ]; then
     # NOTE(vish): This will just get the first ip in the list, so if you
     #             have more than one eth device set up, this will fail, and
     #             you should explicitly set HOST_IP in your environment
-    HOST_IP=`ifconfig  | grep -m 1 'inet addr:'| cut -d: -f2 | awk '{print $1}'`
+    HOST_IP=`LC_ALL=C ifconfig  | grep -m 1 'inet addr:'| cut -d: -f2 | awk '{print $1}'`
 fi
 
 USE_MYSQL=${USE_MYSQL:-0}
 MYSQL_PASS=${MYSQL_PASS:-nova}
 TEST=${TEST:-0}
 USE_LDAP=${USE_LDAP:-0}
+# Use OpenDJ instead of OpenLDAP when using LDAP
+USE_OPENDJ=${USE_OPENDJ:-0}
+# Use IPv6
+USE_IPV6=${USE_IPV6:-0}
 LIBVIRT_TYPE=${LIBVIRT_TYPE:-qemu}
 NET_MAN=${NET_MAN:-VlanManager}
 # NOTE(vish): If you are using FlatDHCP on multiple hosts, set the interface
@@ -58,6 +62,10 @@ if [ -n "$FLAT_INTERFACE" ]; then
     echo "--flat_interface=$FLAT_INTERFACE" >>$NOVA_DIR/bin/nova.conf
 fi
 
+if [ -n "$USE_IPV6" ]; then
+    echo "--use_ipv6" >>$NOVA_DIR/bin/nova.conf
+fi
+
 if [ "$CMD" == "branch" ]; then
     sudo apt-get install -y bzr
     rm -rf $NOVA_DIR
@@ -83,9 +91,16 @@ if [ "$CMD" == "install" ]; then
     sudo /etc/init.d/libvirt-bin restart
     sudo modprobe nbd
     sudo apt-get install -y python-twisted python-sqlalchemy python-mox python-greenlet python-carrot
-    sudo apt-get install -y python-daemon python-eventlet python-gflags python-ipy python-cheetah
-    sudo apt-get install -y python-libvirt python-libxml2 python-routes python-paste
-    sudo apt-get install -y python-netaddr python-tempita python-migrate python-pastedeploy
+    sudo apt-get install -y python-daemon python-eventlet python-gflags python-ipy python-tempita
+    sudo apt-get install -y python-libvirt python-libxml2 python-routes python-cheetah
+    sudo apt-get install -y python-netaddr python-paste python-pastedeploy python-glance
+
+    if [ -n "$USE_IPV6" ]; then
+        sudo apt-get install -y radvd
+        sudo bash -c "echo 1 > /proc/sys/net/ipv6/conf/all/forwarding"
+        sudo bash -c "echo 0 > /proc/sys/net/ipv6/conf/all/accept_ra"
+    fi
+
     if [ "$USE_MYSQL" == 1 ]; then
         cat <<MYSQL_PRESEED | debconf-set-selections
 mysql-server-5.1 mysql-server/root_password password $MYSQL_PASS
@@ -107,6 +122,9 @@ function screen_it {
 
 if [ "$CMD" == "run" ]; then
     killall dnsmasq
+    if [ -n "$USE_IPV6" ]; then
+       killall radvd
+    fi
     screen -d -m -S nova -t nova
     sleep 1
     if [ "$USE_MYSQL" == 1 ]; then
@@ -116,7 +134,13 @@ if [ "$CMD" == "run" ]; then
         rm $NOVA_DIR/nova.sqlite
     fi
     if [ "$USE_LDAP" == 1 ]; then
-        sudo $NOVA_DIR/nova/auth/slap.sh
+        if [ "$USE_OPENDJ" == 1 ]; then
+            echo '--ldap_user_dn=cn=Directory Manager' >> \
+                /etc/nova/nova-manage.conf
+            sudo $NOVA_DIR/nova/auth/opendj.sh
+        else
+            sudo $NOVA_DIR/nova/auth/slap.sh
+        fi
     fi
     rm -rf $NOVA_DIR/instances
     mkdir -p $NOVA_DIR/instances
@@ -150,6 +174,7 @@ if [ "$CMD" == "run" ]; then
     screen_it network "$NOVA_DIR/bin/nova-network"
     screen_it scheduler "$NOVA_DIR/bin/nova-scheduler"
     screen_it volume "$NOVA_DIR/bin/nova-volume"
+    screen_it ajax_console_proxy "$NOVA_DIR/bin/nova-ajax-console-proxy"
     screen_it test ". $NOVA_DIR/novarc"
     screen -S nova -x
 fi
