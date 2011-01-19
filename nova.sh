@@ -157,6 +157,8 @@ if [ "$CMD" == "run" ]; then
         cd $DIR
     fi
 
+    # create the database
+    $NOVA_DIR/bin/nova-manage db sync
     # create an admin user called 'admin'
     $NOVA_DIR/bin/nova-manage user admin admin admin admin
     # create a project called 'admin' with project manager of 'admin'
