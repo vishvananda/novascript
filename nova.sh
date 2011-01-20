@@ -18,6 +18,7 @@ if [ ! -n "$HOST_IP" ]; then
     HOST_IP=`LC_ALL=C ifconfig  | grep -m 1 'inet addr:'| cut -d: -f2 | awk '{print $1}'`
 fi
 
+INSTALL_UML=${INSTALL_UML:-0}
 USE_MYSQL=${USE_MYSQL:-0}
 MYSQL_PASS=${MYSQL_PASS:-nova}
 TEST=${TEST:-0}
@@ -63,8 +64,11 @@ if [ "$CMD" == "install" ]; then
     sudo apt-get install -y python-software-properties
     sudo add-apt-repository ppa:nova-core/trunk
     sudo apt-get update
-    sudo apt-get install -y dnsmasq-base kpartx kvm gawk iptables ebtables
-    sudo apt-get install -y user-mode-linux kvm libvirt-bin
+    sudo apt-get install -y dnsmasq-base kpartx gawk iptables ebtables
+    sudo apt-get install -y kvm libvirt-bin
+    if [ "$INSTALL_UML" == 1 ]; then
+        sudo apt-get install -y user-mode-linux
+    fi
     sudo apt-get install -y screen euca2ools vlan curl rabbitmq-server
     sudo apt-get install -y lvm2 iscsitarget open-iscsi
     sudo apt-get install -y socat
