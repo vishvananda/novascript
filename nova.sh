@@ -47,7 +47,7 @@ fi
 
 if [ "$CMD" == "branch" ]; then
     sudo apt-get install -y bzr
-    if [ ! -f "$DIR/.bzr" ]; then
+    if [ ! -e "$DIR/.bzr" ]; then
         bzr init-repo $DIR
     fi
     rm -rf $NOVA_DIR
