@@ -45,7 +45,6 @@ else
     AUTH=dbdriver.DbDriver
 fi
 
-mkdir -p /etc/nova
 cat >$NOVA_DIR/bin/nova.conf << NOVA_CONF_EOF
 --verbose
 --nodaemon
