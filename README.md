@@ -6,17 +6,18 @@ This script will install and run nova on ubuntu.
 Usage
 -----
 
-Unless you want to spend a lot of time fiddling with permissions and sudoers, you should probably run nova as root.
-
-    sudo -i
-
 If you are concerned about security, nova runs just fine inside a virtual machine.
 
 Use the script to install and run the current trunk. You can also specify a specific branch by putting lp:~someone/nova/some-branch after the branch command
 
+    curl -O https://github.com/vishvananda/novascript/raw/master/nova.sh
+    chmod 755 nova.sh
     ./nova.sh branch
     ./nova.sh install
-    ./nova.sh run
+
+Unless you want to spend a lot of time fiddling with permissions and sudoers, you should probably run nova as root.
+
+    sudo ./nova.sh run
 
 The run command will drop you into a screen session with all of the workers running in different windows  You can use eucatools to run commands against the cloud.
 
