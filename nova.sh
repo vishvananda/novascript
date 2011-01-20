@@ -47,7 +47,9 @@ fi
 
 if [ "$CMD" == "branch" ]; then
     sudo apt-get install -y bzr
-    bzr init-repo .
+    if [ ! -f "$DIR/.bzr" ]; then
+        bzr init-repo $DIR
+    fi
     rm -rf $NOVA_DIR
     bzr branch $SOURCE_BRANCH $NOVA_DIR
     cd $NOVA_DIR
@@ -90,8 +92,9 @@ mysql-server-5.1 mysql-server/start_on_boot boolean true
 MYSQL_PRESEED
         apt-get install -y mysql-server python-mysqldb
     fi
-    wget -c http://c2477062.cdn.cloudfiles.rackspacecloud.com/images.tgz
-    tar -C $DIR -zxf images.tgz
+    mkdir -p $DIR/images
+    wget -c http://images.ansolabs.com/tty.tgz
+    tar -C $DIR/images -zxf tty.tgz
     exit
 fi
 

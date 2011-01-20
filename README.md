@@ -21,7 +21,7 @@ Use the script to install and run the current trunk. You can also specify a spec
 The run command will drop you into a screen session with all of the workers running in different windows  You can use eucatools to run commands against the cloud.
 
     euca-add-keypair test > test.pem
-    euca-run-instances -k test -t m1.tiny ami-tiny
+    euca-run-instances -k test -t m1.tiny ami-tty
     euca-describe-instances
 
 To see output from the various workers, switch screen windows
