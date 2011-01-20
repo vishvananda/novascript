@@ -45,26 +45,6 @@ else
     AUTH=dbdriver.DbDriver
 fi
 
-cat >$NOVA_DIR/bin/nova.conf << NOVA_CONF_EOF
---verbose
---nodaemon
---dhcpbridge_flagfile=$NOVA_DIR/bin/nova.conf
---network_manager=nova.network.manager.$NET_MAN
---cc_host=$HOST_IP
---routing_source_ip=$HOST_IP
---sql_connection=$SQL_CONN
---auth_driver=nova.auth.$AUTH
---libvirt_type=$LIBVIRT_TYPE
-NOVA_CONF_EOF
-
-if [ -n "$FLAT_INTERFACE" ]; then
-    echo "--flat_interface=$FLAT_INTERFACE" >>$NOVA_DIR/bin/nova.conf
-fi
-
-if [ "$USE_IPV6" == 1 ]; then
-    echo "--use_ipv6" >>$NOVA_DIR/bin/nova.conf
-fi
-
 if [ "$CMD" == "branch" ]; then
     sudo apt-get install -y bzr
     bzr init-repo .
@@ -73,6 +53,7 @@ if [ "$CMD" == "branch" ]; then
     cd $NOVA_DIR
     mkdir -p $NOVA_DIR/instances
     mkdir -p $NOVA_DIR/networks
+    exit
 fi
 
 # You should only have to run this once
@@ -111,6 +92,7 @@ MYSQL_PRESEED
     fi
     wget -c http://c2477062.cdn.cloudfiles.rackspacecloud.com/images.tgz
     tar -C $DIR -zxf images.tgz
+    exit
 fi
 
 NL=`echo -ne '\015'`
@@ -121,6 +103,27 @@ function screen_it {
 }
 
 if [ "$CMD" == "run" ]; then
+
+  cat >$NOVA_DIR/bin/nova.conf << NOVA_CONF_EOF
+--verbose
+--nodaemon
+--dhcpbridge_flagfile=$NOVA_DIR/bin/nova.conf
+--network_manager=nova.network.manager.$NET_MAN
+--cc_host=$HOST_IP
+--routing_source_ip=$HOST_IP
+--sql_connection=$SQL_CONN
+--auth_driver=nova.auth.$AUTH
+--libvirt_type=$LIBVIRT_TYPE
+NOVA_CONF_EOF
+
+    if [ -n "$FLAT_INTERFACE" ]; then
+        echo "--flat_interface=$FLAT_INTERFACE" >>$NOVA_DIR/bin/nova.conf
+    fi
+
+    if [ "$USE_IPV6" == 1 ]; then
+        echo "--use_ipv6" >>$NOVA_DIR/bin/nova.conf
+    fi
+
     killall dnsmasq
     if [ "$USE_IPV6" == 1 ]; then
        killall radvd
