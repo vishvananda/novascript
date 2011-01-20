@@ -74,7 +74,7 @@ if [ "$CMD" == "install" ]; then
     sudo /etc/init.d/libvirt-bin restart
     sudo modprobe nbd
     sudo apt-get install -y python-twisted python-sqlalchemy python-mox python-greenlet python-carrot
-    sudo apt-get install -y python-daemon python-eventlet python-gflags python-ipy python-tempita
+    sudo apt-get install -y python-migrate python-eventlet python-gflags python-ipy python-tempita
     sudo apt-get install -y python-libvirt python-libxml2 python-routes python-cheetah
     sudo apt-get install -y python-netaddr python-paste python-pastedeploy python-glance
 
