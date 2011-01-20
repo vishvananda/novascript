@@ -68,6 +68,7 @@ fi
 
 if [ "$CMD" == "branch" ]; then
     sudo apt-get install -y bzr
+    bzr init-repo .
     rm -rf $NOVA_DIR
     bzr branch $SOURCE_BRANCH $NOVA_DIR
     cd $NOVA_DIR
