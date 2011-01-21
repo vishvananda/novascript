@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 DIR=`pwd`
 CMD=$1
-SOURCE_BRANCH=lp:nova
-if [ -n "$2" ]; then
-    SOURCE_BRANCH=$2
+if [ "$CMD" = "branch" ]; then
+    SOURCE_BRANCH=${2:-lp:nova}
+    DIRNAME=${3:-nova}
+else
+    DIRNAME=${2:-nova}
 fi
-DIRNAME=nova
+
 NOVA_DIR=$DIR/$DIRNAME
-if [ -n "$3" ]; then
-    NOVA_DIR=$DIR/$3
-fi
 
 if [ ! -n "$HOST_IP" ]; then
     # NOTE(vish): This will just get the first ip in the list, so if you
