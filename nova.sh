@@ -17,7 +17,9 @@ if [ ! -n "$HOST_IP" ]; then
     HOST_IP=`LC_ALL=C ifconfig  | grep -m 1 'inet addr:'| cut -d: -f2 | awk '{print $1}'`
 fi
 
-USE_MYSQL=${USE_MYSQL:-0}
+INTERFACE=${INTERFACE:-eth0}
+FLOATING_RANGE=${FLOATING_RANGE:-10.6.0.0/27}
+USE_LDAP=${USE_E_MYSQL:-0}
 MYSQL_PASS=${MYSQL_PASS:-nova}
 TEST=${TEST:-0}
 USE_LDAP=${USE_LDAP:-0}
@@ -112,6 +114,8 @@ if [ "$CMD" == "run" ]; then
 --dhcpbridge_flagfile=$NOVA_DIR/bin/nova.conf
 --network_manager=nova.network.manager.$NET_MAN
 --my_ip=$HOST_IP
+--public_interface=$INTERFACE
+--vlan_interface=$INTERFACE
 --sql_connection=$SQL_CONN
 --auth_driver=nova.auth.$AUTH
 --libvirt_type=$LIBVIRT_TYPE
@@ -170,7 +174,7 @@ NOVA_CONF_EOF
     $NOVA_DIR/bin/nova-manage network create 10.0.0.0/8 1 32
 
     # create some floating ips
-    $NOVA_DIR/bin/nova-manage floating create `hostname` 10.6.0.0/27
+    $NOVA_DIR/bin/nova-manage floating create `hostname` $FLOATING_RANGE
 
     # nova api crashes if we start it with a regular screen command,
     # so send the start command by forcing text into the window.
