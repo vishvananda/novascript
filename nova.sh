@@ -19,6 +19,7 @@ fi
 
 INTERFACE=${INTERFACE:-eth0}
 FLOATING_RANGE=${FLOATING_RANGE:-10.6.0.0/27}
+FIXED_RANGE=${FLOATING_RANGE:-10.0.0.0/24}
 USE_LDAP=${USE_E_MYSQL:-0}
 MYSQL_PASS=${MYSQL_PASS:-nova}
 TEST=${TEST:-0}
@@ -171,7 +172,7 @@ NOVA_CONF_EOF
     # create a project called 'admin' with project manager of 'admin'
     $NOVA_DIR/bin/nova-manage project create admin admin
     # create a small network
-    $NOVA_DIR/bin/nova-manage network create 10.0.0.0/8 1 32
+    $NOVA_DIR/bin/nova-manage network create $FIXED_RANGE 1 32
 
     # create some floating ips
     $NOVA_DIR/bin/nova-manage floating create `hostname` $FLOATING_RANGE
