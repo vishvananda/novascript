@@ -107,7 +107,7 @@ function screen_it {
     screen -S nova -p $1 -X stuff "$2$NL"
 }
 
-if [ "$CMD" == "run" ]; then
+if [ "$CMD" == "run" ] || [ "$CMD" == "run_detached" ]; then
 
   cat >$NOVA_DIR/bin/nova.conf << NOVA_CONF_EOF
 --verbose
@@ -192,7 +192,9 @@ NOVA_CONF_EOF
     unzip -o $NOVA_DIR/nova.zip -d $NOVA_DIR/
 
     screen_it test ". $NOVA_DIR/novarc"
-    screen -S nova -x
+    if [ "$CMD" != "run_detached" ]; then
+      screen -S nova -x
+    fi
 fi
 
 if [ "$CMD" == "run" ] || [ "$CMD" == "terminate" ]; then
