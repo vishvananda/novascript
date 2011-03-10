@@ -191,6 +191,7 @@ NOVA_CONF_EOF
     $NOVA_DIR/bin/nova-manage project zipfile admin admin $NOVA_DIR/nova.zip
     unzip -o $NOVA_DIR/nova.zip -d $NOVA_DIR/
 
+    screen_it test "export PATH=$NOVA_DIR/bin:$PATH"
     screen_it test ". $NOVA_DIR/novarc"
     if [ "$CMD" != "run_detached" ]; then
       screen -S nova -x
