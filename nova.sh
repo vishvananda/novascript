@@ -180,6 +180,9 @@ NOVA_CONF_EOF
     # create some floating ips
     $NOVA_DIR/bin/nova-manage floating create `hostname` $FLOATING_RANGE
 
+    # convert old images
+    $NOVA_DIR/bin/nova-manage image convert $DIR/images
+
     # nova api crashes if we start it with a regular screen command,
     # so send the start command by forcing text into the window.
     screen_it api "$NOVA_DIR/bin/nova-api"
