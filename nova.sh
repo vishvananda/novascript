@@ -81,6 +81,7 @@ if [ "$CMD" == "install" ]; then
     sudo apt-get install -y python-netaddr python-pastedeploy python-eventlet
     sudo apt-get install -y python-novaclient python-glance python-cheetah
     sudo apt-get install -y python-carrot python-tempita python-sqlalchemy
+    sudo apt-get install -y python-suds
 
 
     if [ "$USE_IPV6" == 1 ]; then
