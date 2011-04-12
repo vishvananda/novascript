@@ -91,12 +91,12 @@ if [ "$CMD" == "install" ]; then
     fi
 
     if [ "$USE_MYSQL" == 1 ]; then
-        cat <<MYSQL_PRESEED | debconf-set-selections
+        cat <<MYSQL_PRESEED | sudo debconf-set-selections
 mysql-server-5.1 mysql-server/root_password password $MYSQL_PASS
 mysql-server-5.1 mysql-server/root_password_again password $MYSQL_PASS
 mysql-server-5.1 mysql-server/start_on_boot boolean true
 MYSQL_PRESEED
-        apt-get install -y mysql-server python-mysqldb
+        sudo apt-get install -y mysql-server python-mysqldb
     fi
     mkdir -p $DIR/images
     wget -c http://images.ansolabs.com/tty.tgz
