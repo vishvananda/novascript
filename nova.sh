@@ -9,6 +9,7 @@ else
 fi
 
 NOVA_DIR=$DIR/$DIRNAME
+GLANCE_DIR=$DIR/glance
 
 if [ ! -n "$HOST_IP" ]; then
     # NOTE(vish): This will just get the first ip in the list, so if you
@@ -71,7 +72,7 @@ if [ "$CMD" == "install" ]; then
     echo "rabbitmq-server rabbitmq-server/upgrade_previous note" | sudo debconf-set-selections
     sudo apt-get install -y screen euca2ools vlan curl rabbitmq-server
     sudo apt-get install -y lvm2 iscsitarget open-iscsi
-    sudo apt-get install -y socat unzip
+    sudo apt-get install -y socat unzip glance
     echo "ISCSITARGET_ENABLE=true" | sudo tee /etc/default/iscsitarget
     sudo /etc/init.d/iscsitarget restart
     sudo modprobe kvm
