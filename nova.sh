@@ -67,7 +67,7 @@ if [ "$CMD" == "install" ]; then
     sudo apt-get update
     sudo apt-get install -y dnsmasq-base kpartx kvm gawk iptables ebtables
     sudo apt-get install -y user-mode-linux kvm libvirt-bin
-    # Bypass  RabbitMQ "OK" dialog 
+    # Bypass  RabbitMQ "OK" dialog
     echo "rabbitmq-server rabbitmq-server/upgrade_previous note" | sudo debconf-set-selections
     sudo apt-get install -y screen euca2ools vlan curl rabbitmq-server
     sudo apt-get install -y lvm2 iscsitarget open-iscsi
@@ -126,6 +126,7 @@ if [ "$CMD" == "run" ] || [ "$CMD" == "run_detached" ]; then
 --sql_connection=$SQL_CONN
 --auth_driver=nova.auth.$AUTH
 --libvirt_type=$LIBVIRT_TYPE
+--fixed_range=$FIXED_RANGE
 NOVA_CONF_EOF
 
     if [ -n "$FLAT_INTERFACE" ]; then
@@ -174,10 +175,10 @@ NOVA_CONF_EOF
     # create a project called 'admin' with project manager of 'admin'
     $NOVA_DIR/bin/nova-manage project create admin admin
     # create a small network
-    $NOVA_DIR/bin/nova-manage network create $FIXED_RANGE 1 32
+    $NOVA_DIR/bin/nova-manage network create private $FIXED_RANGE 1 32
 
     # create some floating ips
-    $NOVA_DIR/bin/nova-manage floating create `hostname` $FLOATING_RANGE
+    $NOVA_DIR/bin/nova-manage floating create $FLOATING_RANGE
 
     if [ ! -d "$NOVA_DIR/images" ]; then
         if [ ! -d "$DIR/converted-images" ]; then
