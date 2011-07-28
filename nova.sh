@@ -18,6 +18,23 @@ function screen_it {
 }
 function error() { echo "$@" 1>&2; }
 function fail() { [ $# -eq 0 ] || error "$@" ; exit 1; }
+
+has_fsmp() {
+  # has_fsmp(mountpoint,file): does file have an fstab entry for mountpoint
+  awk '$1 !~ /#/ && $2 == mp { e=1; } ; END { exit(!e); }' "mp=$1" "$2" ;
+}
+
+function lxc_setup() {
+  local mntline cmd=""
+  mntline="none /cgroups cgroup cpuacct,memory,devices,cpu,freezer,blkio 0 0"
+  has_fsmp "/cgroups" /etc/fstab ||
+     cmd="$cmd && mkdir -p /cgroups && echo '$mntline' >> /etc/fstab"
+  has_fsmp "/cgroups" /proc/mounts ||
+     cmd="$cmd && mount /cgroups"
+  
+  [ -z "$cmd" ] && return 0
+  sudo sh -c ": $cmd"
+}
 # end function definitions
 
 NOVA_DIR=$DIR/$DIRNAME
@@ -71,6 +88,8 @@ if [ "$CMD" == "branch" ]; then
     mkdir -p $NOVA_DIR/networks
     exit
 fi
+
+[ "$LIBVIRT_TYPE" != "lxc" ] || lxc_setup || fail "failed to setup lxc"
 
 # You should only have to run this once
 if [ "$CMD" == "install" ]; then
@@ -135,18 +154,6 @@ if [ "$CMD" == "run" ] || [ "$CMD" == "run_detached" ]; then
   sleep 1
   if [ "$SCREEN_STATUS" != "0" ]; then
     screen -r "$SCREEN_NAME" -X hardstatus alwayslastline "%-Lw%{= BW}%50>%n%f* %t%{-}%+Lw%< %= %H"
-  fi
-
-
-  if [ "$LIBVIRT_TYPE" = "lxc" ]; then
-    if ent=$(awk '$2 == "/cgroups" { print $2 }' /etc/fstab) &&
-       [ -z "$ent" ]; then
-       mkdir -p /cgroups
-       echo "none /cgroups cgroup cpuacct,memory,devices,cpu,freezer,blkio 0 0" |
-         tee -a /etc/fstab
-    fi
-    [ -n "$(awk '$2 == "/cgroups" { print $2 }' /proc/mounts)" ] ||
-      mount /cgroups
   fi
 
   cat >$NOVA_DIR/bin/nova.conf << NOVA_CONF_EOF
