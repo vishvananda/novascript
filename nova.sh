@@ -142,7 +142,7 @@ if [ "$CMD" == "run" ] || [ "$CMD" == "run_detached" ]; then
        echo "none /cgroups cgroup cpuacct,memory,devices,cpu,freezer,blkio 0 0" |
          tee -a /etc/fstab
     fi
-    [ -n "$(awk '$2 == "/cgroups" && { print $2 }' /proc/mounts)" ] ||
+    [ -n "$(awk '$2 == "/cgroups" { print $2 }' /proc/mounts)" ] ||
       mount /cgroups
   fi
 
