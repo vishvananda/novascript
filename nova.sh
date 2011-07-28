@@ -16,6 +16,8 @@ function screen_it {
     screen -r "$SCREEN_NAME" -x -X screen -t $1
     screen -r "$SCREEN_NAME" -x -p $1 -X stuff "$2$NL"
 }
+function error() { echo "$@" 1>&2; }
+function fail() { [ $# -eq 0 ] || error "$@" ; exit 1; }
 # end function definitions
 
 NOVA_DIR=$DIR/$DIRNAME
