@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 DIR=`pwd`
 CMD=$1
+SCREEN_NAME="nova"
+SCREEN_STATUS=${SCREEN_STATUS:-1}
+
 if [ "$CMD" = "branch" ]; then
     SOURCE_BRANCH=${2:-lp:nova}
     DIRNAME=${3:-nova}
@@ -110,11 +113,26 @@ fi
 NL=`echo -ne '\015'`
 
 function screen_it {
-    screen -S nova -X screen -t $1
-    screen -S nova -p $1 -X stuff "$2$NL"
+    screen -r "$SCREEN_NAME" -x -X screen -t $1
+    screen -r "$SCREEN_NAME" -x -p $1 -X stuff "$2$NL"
 }
 
 if [ "$CMD" == "run" ] || [ "$CMD" == "run_detached" ]; then
+  # check for existing screen, exit if present
+  found=$(screen -ls | awk '-F\t' '$2 ~ m {print $2}' "m=[0-9]+[.]$SCREEN_NAME")
+  if [ -n "$found" ]; then
+    {
+    echo "screen named '$SCREEN_NAME' already exists!"
+    echo " kill it with: screen -r '$SCREEN_NAME' -x -X quit"
+    echo " attach to it with: screen -d -r '$SCREEN_NAME'"
+    exit 1;
+    } 2>&1
+  fi
+  screen -d -m -S $SCREEN_NAME -t nova
+  sleep 1
+  if [ "$SCREEN_STATUS" != "0" ]; then
+    screen -r "$SCREEN_NAME" -X hardstatus alwayslastline "%-Lw%{= BW}%50>%n%f* %t%{-}%+Lw%< %= %H"
+  fi
 
   cat >$NOVA_DIR/bin/nova.conf << NOVA_CONF_EOF
 --verbose
@@ -142,7 +160,6 @@ NOVA_CONF_EOF
     if [ "$USE_IPV6" == 1 ]; then
        killall radvd
     fi
-    screen -d -m -S nova -t nova
     sleep 1
     if [ "$USE_MYSQL" == 1 ]; then
         mysql -p$MYSQL_PASS -e 'DROP DATABASE nova;'
