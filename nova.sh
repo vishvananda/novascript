@@ -134,6 +134,18 @@ if [ "$CMD" == "run" ] || [ "$CMD" == "run_detached" ]; then
     screen -r "$SCREEN_NAME" -X hardstatus alwayslastline "%-Lw%{= BW}%50>%n%f* %t%{-}%+Lw%< %= %H"
   fi
 
+
+  if [ "$LIBVIRT_TYPE" = "lxc" ]; then
+    if ent=$(awk '$2 == "/cgroups" { print $2 }' /etc/fstab) &&
+       [ -z "$ent" ]; then
+       mkdir -p /cgroups
+       echo "none /cgroups cgroup cpuacct,memory,devices,cpu,freezer,blkio 0 0" |
+         tee -a /etc/fstab
+    fi
+    [ -n "$(awk '$2 == "/cgroups" && { print $2 }' /proc/mounts)" ] ||
+      mount /cgroups
+  fi
+
   cat >$NOVA_DIR/bin/nova.conf << NOVA_CONF_EOF
 --verbose
 --nodaemon
