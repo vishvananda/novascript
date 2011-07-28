@@ -11,16 +11,15 @@ else
     DIRNAME=${2:-nova}
 fi
 
+# function definitions
+function screen_it {
+    screen -r "$SCREEN_NAME" -x -X screen -t $1
+    screen -r "$SCREEN_NAME" -x -p $1 -X stuff "$2$NL"
+}
+# end function definitions
+
 NOVA_DIR=$DIR/$DIRNAME
 GLANCE_DIR=$DIR/glance
-
-if [ ! -n "$HOST_IP" ]; then
-    # NOTE(vish): This will just get the first ip in the list, so if you
-    #             have more than one eth device set up, this will fail, and
-    #             you should explicitly set HOST_IP in your environment
-    HOST_IP=`LC_ALL=C ifconfig  | grep -m 1 'inet addr:'| cut -d: -f2 | awk '{print $1}'`
-fi
-
 USE_MYSQL=${USE_MYSQL:-1}
 INTERFACE=${INTERFACE:-eth0}
 FLOATING_RANGE=${FLOATING_RANGE:-10.6.0.0/27}
@@ -38,6 +37,13 @@ NET_MAN=${NET_MAN:-VlanManager}
 #             below but make sure that the interface doesn't already have an
 #             ip or you risk breaking things.
 # FLAT_INTERFACE=eth0
+if [ ! -n "$HOST_IP" ]; then
+    # NOTE(vish): This will just get the first ip in the list, so if you
+    #             have more than one eth device set up, this will fail, and
+    #             you should explicitly set HOST_IP in your environment
+    HOST_IP=`LC_ALL=C ifconfig  | grep -m 1 'inet addr:'| cut -d: -f2 | awk '{print $1}'`
+fi
+
 
 if [ "$USE_MYSQL" == 1 ]; then
     SQL_CONN=mysql://root:$MYSQL_PASS@localhost/nova
@@ -111,11 +117,6 @@ MYSQL_PRESEED
 fi
 
 NL=`echo -ne '\015'`
-
-function screen_it {
-    screen -r "$SCREEN_NAME" -x -X screen -t $1
-    screen -r "$SCREEN_NAME" -x -p $1 -X stuff "$2$NL"
-}
 
 if [ "$CMD" == "run" ] || [ "$CMD" == "run_detached" ]; then
   # check for existing screen, exit if present
