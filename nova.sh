@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 DIR=`pwd`
 CMD=$1
+SCREEN_NAME="nova"
+SCREEN_STATUS=${SCREEN_STATUS:-1}
+
 if [ "$CMD" = "branch" ]; then
     SOURCE_BRANCH=${2:-lp:nova}
     DIRNAME=${3:-nova}
@@ -8,16 +11,34 @@ else
     DIRNAME=${2:-nova}
 fi
 
+# function definitions
+function screen_it {
+    screen -r "$SCREEN_NAME" -x -X screen -t $1
+    screen -r "$SCREEN_NAME" -x -p $1 -X stuff "$2$NL"
+}
+function error() { echo "$@" 1>&2; }
+function fail() { [ $# -eq 0 ] || error "$@" ; exit 1; }
+
+has_fsmp() {
+  # has_fsmp(mountpoint,file): does file have an fstab entry for mountpoint
+  awk '$1 !~ /#/ && $2 == mp { e=1; } ; END { exit(!e); }' "mp=$1" "$2" ;
+}
+
+function lxc_setup() {
+  local mntline cmd=""
+  mntline="none /cgroups cgroup cpuacct,memory,devices,cpu,freezer,blkio 0 0"
+  has_fsmp "/cgroups" /etc/fstab ||
+     cmd="$cmd && mkdir -p /cgroups && echo '$mntline' >> /etc/fstab"
+  has_fsmp "/cgroups" /proc/mounts ||
+     cmd="$cmd && mount /cgroups"
+  
+  [ -z "$cmd" ] && return 0
+  sudo sh -c ": $cmd"
+}
+# end function definitions
+
 NOVA_DIR=$DIR/$DIRNAME
 GLANCE_DIR=$DIR/glance
-
-if [ ! -n "$HOST_IP" ]; then
-    # NOTE(vish): This will just get the first ip in the list, so if you
-    #             have more than one eth device set up, this will fail, and
-    #             you should explicitly set HOST_IP in your environment
-    HOST_IP=`LC_ALL=C ifconfig  | grep -m 1 'inet addr:'| cut -d: -f2 | awk '{print $1}'`
-fi
-
 USE_MYSQL=${USE_MYSQL:-1}
 INTERFACE=${INTERFACE:-eth0}
 FLOATING_RANGE=${FLOATING_RANGE:-10.6.0.0/27}
@@ -35,6 +56,13 @@ NET_MAN=${NET_MAN:-VlanManager}
 #             below but make sure that the interface doesn't already have an
 #             ip or you risk breaking things.
 # FLAT_INTERFACE=eth0
+if [ ! -n "$HOST_IP" ]; then
+    # NOTE(vish): This will just get the first ip in the list, so if you
+    #             have more than one eth device set up, this will fail, and
+    #             you should explicitly set HOST_IP in your environment
+    HOST_IP=`LC_ALL=C ifconfig  | grep -m 1 'inet addr:'| cut -d: -f2 | awk '{print $1}'`
+fi
+
 
 if [ "$USE_MYSQL" == 1 ]; then
     SQL_CONN=mysql://root:$MYSQL_PASS@localhost/nova
@@ -60,6 +88,8 @@ if [ "$CMD" == "branch" ]; then
     mkdir -p $NOVA_DIR/networks
     exit
 fi
+
+[ "$LIBVIRT_TYPE" != "lxc" ] || lxc_setup || fail "failed to setup lxc"
 
 # You should only have to run this once
 if [ "$CMD" == "install" ]; then
@@ -109,12 +139,22 @@ fi
 
 NL=`echo -ne '\015'`
 
-function screen_it {
-    screen -S nova -X screen -t $1
-    screen -S nova -p $1 -X stuff "$2$NL"
-}
-
 if [ "$CMD" == "run" ] || [ "$CMD" == "run_detached" ]; then
+  # check for existing screen, exit if present
+  found=$(screen -ls | awk '-F\t' '$2 ~ m {print $2}' "m=[0-9]+[.]$SCREEN_NAME")
+  if [ -n "$found" ]; then
+    {
+    echo "screen named '$SCREEN_NAME' already exists!"
+    echo " kill it with: screen -r '$SCREEN_NAME' -x -X quit"
+    echo " attach to it with: screen -d -r '$SCREEN_NAME'"
+    exit 1;
+    } 2>&1
+  fi
+  screen -d -m -S $SCREEN_NAME -t nova
+  sleep 1
+  if [ "$SCREEN_STATUS" != "0" ]; then
+    screen -r "$SCREEN_NAME" -X hardstatus alwayslastline "%-Lw%{= BW}%50>%n%f* %t%{-}%+Lw%< %= %H"
+  fi
 
   cat >$NOVA_DIR/bin/nova.conf << NOVA_CONF_EOF
 --verbose
@@ -142,7 +182,6 @@ NOVA_CONF_EOF
     if [ "$USE_IPV6" == 1 ]; then
        killall radvd
     fi
-    screen -d -m -S nova -t nova
     sleep 1
     if [ "$USE_MYSQL" == 1 ]; then
         mysql -p$MYSQL_PASS -e 'DROP DATABASE nova;'
