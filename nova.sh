@@ -45,6 +45,7 @@ FLOATING_RANGE=${FLOATING_RANGE:-10.6.0.0/27}
 FIXED_RANGE=${FIXED_RANGE:-10.0.0.0/24}
 MYSQL_PASS=${MYSQL_PASS:-nova}
 LOCK_PATH=${LOCK_PATH:-/tmp}
+INSTANCES_PATH=${INSTANCES_PATH:-$NOVA_DIR/instances}
 TEST=${TEST:-0}
 USE_LDAP=${USE_LDAP:-0}
 # Use OpenDJ instead of OpenLDAP when using LDAP
@@ -167,6 +168,7 @@ if [ "$CMD" == "run" ] || [ "$CMD" == "run_detached" ]; then
 --libvirt_type=$LIBVIRT_TYPE
 --fixed_range=$FIXED_RANGE
 --lock_path=$LOCK_PATH
+--instances_path=$INSTANCES_PATH
 NOVA_CONF_EOF
 
     if [ -n "$FLAT_INTERFACE" ]; then
