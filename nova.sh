@@ -31,7 +31,7 @@ function lxc_setup() {
      cmd="$cmd && mkdir -p /cgroups && echo '$mntline' >> /etc/fstab"
   has_fsmp "/cgroups" /proc/mounts ||
      cmd="$cmd && mount /cgroups"
-  
+
   [ -z "$cmd" ] && return 0
   sudo sh -c ": $cmd"
 }
@@ -131,9 +131,6 @@ mysql-server-5.1 mysql-server/start_on_boot boolean true
 MYSQL_PRESEED
         sudo apt-get install -y mysql-server python-mysqldb
     fi
-    mkdir -p $DIR/images
-    wget -c http://images.ansolabs.com/tty.tgz
-    tar -C $DIR/images -zxf tty.tgz
     exit
 fi
 
@@ -220,16 +217,13 @@ NOVA_CONF_EOF
     # create some floating ips
     $NOVA_DIR/bin/nova-manage floating create $FLOATING_RANGE
 
-    if [ ! -d "$NOVA_DIR/images" ]; then
-        if [ ! -d "$DIR/converted-images" ]; then
-            # convert old images
-            mkdir $DIR/converted-images
-            ln -s $DIR/converted-images $NOVA_DIR/images
-            $NOVA_DIR/bin/nova-manage image convert $DIR/images
-        else
-            ln -s $DIR/converted-images $NOVA_DIR/images
-        fi
-
+    if [ ! -d $DIR/images ]; then
+        mkdir -p $DIR/images
+        wget -c http://images.ansolabs.com/tty.tgz
+        tar -C $DIR/images -zxf tty.tgz
+    fi
+    if ! glance details | grep ami-tty; then
+        $NOVA_DIR/bin/nova-manage image convert $DIR/images
     fi
 
 
