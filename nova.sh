@@ -53,7 +53,7 @@ USE_OPENDJ=${USE_OPENDJ:-0}
 # Use IPv6
 USE_IPV6=${USE_IPV6:-0}
 LIBVIRT_TYPE=${LIBVIRT_TYPE:-qemu}
-NET_MAN=${NET_MAN:-FlatDhcpManager}
+NET_MAN=${NET_MAN:-FlatDHCPManager}
 # NOTE(vish): If you are using FlatDHCP on multiple hosts, set the interface
 #             below but make sure that the interface doesn't already have an
 #             ip or you risk breaking things.
