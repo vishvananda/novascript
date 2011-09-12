@@ -53,7 +53,7 @@ USE_OPENDJ=${USE_OPENDJ:-0}
 # Use IPv6
 USE_IPV6=${USE_IPV6:-0}
 LIBVIRT_TYPE=${LIBVIRT_TYPE:-qemu}
-NET_MAN=${NET_MAN:-VlanManager}
+NET_MAN=${NET_MAN:-FlatDhcpManager}
 # NOTE(vish): If you are using FlatDHCP on multiple hosts, set the interface
 #             below but make sure that the interface doesn't already have an
 #             ip or you risk breaking things.
@@ -99,17 +99,18 @@ if [ "$CMD" == "install" ]; then
     sudo add-apt-repository ppa:nova-core/trunk
     sudo apt-get update
     sudo apt-get install -y dnsmasq-base kpartx kvm gawk iptables ebtables
-    sudo apt-get install -y user-mode-linux kvm libvirt-bin
+    sudo apt-get install -y user-mode-linux kvm
+    sudo apt-get install -y --force-yes libvirt0=0.8.3-1ubuntu19.1 libvirt-bin=0.8.3-1ubuntu19.1
     # Bypass  RabbitMQ "OK" dialog
     echo "rabbitmq-server rabbitmq-server/upgrade_previous note" | sudo debconf-set-selections
     sudo apt-get install -y screen euca2ools vlan curl rabbitmq-server
     sudo apt-get install -y lvm2 iscsitarget open-iscsi
     sudo apt-get install -y socat unzip glance
-    echo "ISCSITARGET_ENABLE=true" | sudo tee /etc/default/iscsitarget
-    sudo /etc/init.d/iscsitarget restart
-    sudo modprobe kvm
-    sudo /etc/init.d/libvirt-bin restart
-    sudo modprobe nbd
+    # echo "ISCSITARGET_ENABLE=true" | sudo tee /etc/default/iscsitarget
+    # sudo /etc/init.d/iscsitarget restart
+    # sudo modprobe kvm
+    # sudo /etc/init.d/libvirt-bin restart
+    # sudo modprobe nbd
     sudo apt-get install -y python-mox python-lxml python-kombu python-paste
     sudo apt-get install -y python-migrate python-gflags python-greenlet
     sudo apt-get install -y python-libvirt python-libxml2 python-routes
