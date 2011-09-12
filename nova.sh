@@ -106,14 +106,9 @@ if [ "$CMD" == "install" ]; then
     sudo apt-get install -y screen euca2ools vlan curl rabbitmq-server
     sudo apt-get install -y lvm2 iscsitarget open-iscsi
     sudo apt-get install -y socat unzip glance
-    # echo "ISCSITARGET_ENABLE=true" | sudo tee /etc/default/iscsitarget
-    # sudo /etc/init.d/iscsitarget restart
-    # sudo modprobe kvm
-    # sudo /etc/init.d/libvirt-bin restart
-    # sudo modprobe nbd
     sudo apt-get install -y python-mox python-lxml python-kombu python-paste
     sudo apt-get install -y python-migrate python-gflags python-greenlet
-    sudo apt-get install -y python-libvirt python-libxml2 python-routes
+    sudo apt-get install -y python-libxml2 python-routes
     sudo apt-get install -y python-netaddr python-pastedeploy python-eventlet
     sudo apt-get install -y python-novaclient python-glance python-cheetah
     sudo apt-get install -y python-carrot python-tempita python-sqlalchemy
