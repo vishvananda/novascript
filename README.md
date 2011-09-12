@@ -10,7 +10,7 @@ If you are concerned about security, nova runs just fine inside a virtual machin
 
 Use the script to install and run the current trunk. You can also specify a specific branch by putting lp:~someone/nova/some-branch after the branch command
 
-    curl -O https://github.com/vishvananda/novascript/raw/master/nova.sh
+    curl -OL https://raw.github.com/vishvananda/novascript/master/nova.sh
     chmod 755 nova.sh
     ./nova.sh branch
     ./nova.sh install
