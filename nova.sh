@@ -100,7 +100,9 @@ if [ "$CMD" == "install" ]; then
     sudo apt-get update
     sudo apt-get install -y dnsmasq-base kpartx kvm gawk iptables ebtables
     sudo apt-get install -y user-mode-linux kvm
-    sudo apt-get install -y --force-yes libvirt0=0.8.3-1ubuntu19.1 libvirt-bin=0.8.3-1ubuntu19.1
+    sudo apt-get install -y --force-yes libvirt0=0.8.3-1ubuntu19.1 \
+                                        libvirt-bin=0.8.3-1ubuntu19.1 \
+                                        python-libvirt=0.8.3-1ubuntu19.1
     # Bypass  RabbitMQ "OK" dialog
     echo "rabbitmq-server rabbitmq-server/upgrade_previous note" | sudo debconf-set-selections
     sudo apt-get install -y screen euca2ools vlan curl rabbitmq-server
