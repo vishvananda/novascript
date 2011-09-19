@@ -169,6 +169,7 @@ if [ "$CMD" == "run" ] || [ "$CMD" == "run_detached" ]; then
 --fixed_range=$FIXED_RANGE
 --lock_path=$LOCK_PATH
 --instances_path=$INSTANCES_PATH
+--flat_network_bridge=br100
 NOVA_CONF_EOF
 
     if [ -n "$FLAT_INTERFACE" ]; then
