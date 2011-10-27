@@ -1,3 +1,12 @@
+WARNING: SUPERSEDED
+===================
+
+This script has been superseeded by the devstack script here: https://github.com/cloudbuilders/devstack
+
+Nova.sh is no longer being maintained; it may continue to work, but all users are encouraged to use the devstack script instead.
+
+
+
 Nova Installation Script
 ========================
 
